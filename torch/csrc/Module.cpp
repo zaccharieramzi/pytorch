@@ -749,6 +749,10 @@ void initModule(PyObject *module);
 }} // namespace torch::cuda
 #endif
 
+namespace torch {
+void initVerboseBindings(PyObject *module);
+} // namespace torch
+
 bool THDPByteStorage_init(PyObject *module);
 
 static std::vector<PyMethodDef> methods;
@@ -853,6 +857,7 @@ PyObject* initModule() {
 #ifdef USE_CUDA
   torch::cuda::initModule(module);
 #endif
+  torch::initVerboseBindings(module);
   ASSERT_TRUE(THPByteStorage_init(module));
 
 #ifdef USE_CUDA
