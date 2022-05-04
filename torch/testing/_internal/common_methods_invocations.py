@@ -17235,8 +17235,8 @@ op_db: List[OpInfo] = [
         dtypes=floating_types_and(torch.bfloat16),
         dtypesIfCUDA=floating_types_and(torch.float16, torch.bfloat16),
         supports_out=False,
-        supports_forward_ad=True,
-        supports_fwgrad_bwgrad=True,
+        supports_forward_ad=False,
+        supports_fwgrad_bwgrad=False,
         sample_inputs_func=sample_inputs_attn,
     ),
     OpInfo(
