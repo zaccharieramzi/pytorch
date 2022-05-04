@@ -4,6 +4,8 @@ no CUDA calls shall be made, including torch.cuda.device_count(), etc.
 
 torch.testing._internal.common_cuda.py can freely initialize CUDA context when imported.
 """
+import pty
+import select
 
 import sys
 import os
@@ -502,7 +504,11 @@ CI_TEST_PREFIX = str(Path(os.getcwd()))
 
 def wait_for_process(p):
     try:
-        return p.wait()
+        # return p.wait()
+        out, err = p.communicate()
+        print('-======HANQ stdout is', out)
+        print('=========HANQ stderr is', err)
+        return p.returncode
     except KeyboardInterrupt:
         # Give `p` a chance to handle KeyboardInterrupt. Without this,
         # `pytest` can't print errors it collected so far upon KeyboardInterrupt.
@@ -530,8 +536,25 @@ def shell(command, cwd=None, env=None):
     #
     # https://github.com/python/cpython/blob/71b6c1af727fbe13525fb734568057d78cea33f3/Lib/subprocess.py#L309-L323
     assert not isinstance(command, torch._six.string_classes), "Command to shell should be a list or tuple of tokens"
-    p = subprocess.Popen(command, universal_newlines=True, cwd=cwd, env=env)
-    return wait_for_process(p)
+    #p = subprocess.Popen(command, universal_newlines=True, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #return wait_for_process(p)
+    master_fd, slave_fd = pty.openpty()
+    p = subprocess.Popen(
+          command, shell=True, stdin=slave_fd, stdout=slave_fd,
+          stderr=slave_fd,
+          close_fds=True)
+    while True:
+        if select.select([master_fd], [], [], 0.04)[0]: # has something to read
+            data = os.read(master_fd, 1 << 20)
+            if data:
+                print(data, file=sys.stderr)
+            else: # EOF
+                break
+        elif p.poll() is not None: # process is done
+            break
+    os.close(slave_fd)
+    os.close(master_fd)
+    return p.wait()
 
 
 def discover_test_cases_recursively(suite_or_case):
