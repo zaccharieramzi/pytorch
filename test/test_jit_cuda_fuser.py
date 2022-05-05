@@ -45,6 +45,7 @@ os.environ['PYTORCH_NVFUSER_DISABLE_FMA'] = '1'
 os.environ['PYTORCH_NVFUSER_DISABLE_FASTMATH'] = '1'
 os.environ['PYTORCH_NVFUSER_JIT_OPT_LEVEL'] = '0'
 os.environ['PYTORCH_NVFUSER_DISABLE_RNG_UNROLL'] = '1'
+os.environ['PYTORCH_NVFUSER_ENABLE_COMPLEX_PY'] = '1'
 
 if GRAPH_EXECUTOR == ProfilingMode.PROFILING:
     torch._C._jit_set_texpr_fuser_enabled(False)
@@ -575,7 +576,9 @@ class TestCudaFuser(JitTestCase):
             *self.int_types,
             torch.float16,
             torch.float32,
-            torch.float64
+            torch.float64,
+            torch.cfloat,
+            torch.cdouble,
         ]
         if TEST_BF16:
             data_types.append(torch.bfloat16)
@@ -720,12 +723,20 @@ class TestCudaFuser(JitTestCase):
             o = operation(x, y)
             o = 2 + o
             return o
+
+        def t_cdoublex_tensory(x: complex, y: torch.Tensor):
+            o = operation(x, y)
+            o = 2 + o
+            return o
+
         # Omit both scalar cases and swap cases
         assert category1 == "scalar" and category2 != "scalar"
         if dtype_arg1.is_floating_point:
             return t_doublex_tensory
         if dtype_arg1 == torch.int64 or dtype_arg1 == torch.int32:
             return t_intx_tensory
+        if dtype_arg1.is_complex or dtype_arg1 == torch.int32:
+            return t_cdoublex_tensory
         raise NotImplementedError
 
     def _binary_test_helper(self, operation, dtypes, random_data, categories="ndim"):
@@ -883,7 +894,9 @@ class TestCudaFuser(JitTestCase):
             torch.int64,
             torch.float16,
             torch.float32,
-            torch.float64
+            torch.float64,
+            torch.cfloat,
+            torch.cdouble,
         ]
         if TEST_BF16:
             data_types.append(torch.bfloat16)
@@ -909,13 +922,23 @@ class TestCudaFuser(JitTestCase):
             "ndim"
         ]
 
+        skip_complex = {torch.atan2, torch.max, torch.min, torch.remainder,
+                        torch.fmod, torch.ge, torch.gt, torch.le, torch.lt}
+
         binary_dtype_combinations = list(itertools.combinations(data_types, 2))
         category_combinations = list(itertools.combinations(category_types, 2))
 
         for op, dtypes, categories in itertools.product(operations, binary_dtype_combinations, category_combinations):
+            print(op, dtypes, categories)
+            if dtypes[0].is_complex or dtypes[1].is_complex:
+                if op in skip_complex:
+                    continue
             self._binary_test_helper(op, dtypes, True, categories)  # random data
 
         for op, dtypes in itertools.product(operations, binary_dtype_combinations):
+            if dtypes[0].is_complex or dtypes[1].is_complex:
+                if op in skip_complex:
+                    continue
             self._binary_test_helper(op, dtypes, False)  # special numbers
 
     @unittest.skipIf(not RUN_NVFUSER, "requires CUDA")
