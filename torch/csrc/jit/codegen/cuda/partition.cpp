@@ -187,7 +187,8 @@ bool compatibleType(const torch::jit::Value* val) {
       if (temporarilyDisableComplex()) {
         // Complex is disabled until its support is completely added
         // TODO: remove this logic
-        if (isComplexType(aten_to_data_type(tensor_type->scalarType().value()))) {
+        if (isComplexType(
+                aten_to_data_type(tensor_type->scalarType().value()))) {
           return false;
         }
       }
