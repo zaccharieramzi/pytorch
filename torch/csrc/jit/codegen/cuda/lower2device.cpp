@@ -257,7 +257,7 @@ void GpuLower::lower(Fusion* fusion, DataType index_type) {
   // Fuse cetain patterns of reductions, such as a grid reduction
   // followed by a grid broadcast. Only depends on parallelization and
   // thread predicate map.
-  fuseReductions(fusion_);
+  fuseReductionsAndBroadcasts(fusion_);
 
   // Scan the whole fusion and build mappings about halo extensions of
   // all IterDomains
@@ -363,6 +363,10 @@ GpuLower* GpuLower::current() {
 
 bool GpuLower::hasCurrent() {
   return active_gpu_lower != nullptr;
+}
+
+void GpuLower::propagateExprInfo(const Expr* old_expr, const Expr* new_expr) {
+  pred_elimination_.propagateRemovalInfo(old_expr, new_expr);
 }
 
 } // namespace cuda
