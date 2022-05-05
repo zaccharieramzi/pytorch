@@ -795,6 +795,13 @@ class TestCudaFuser(JitTestCase):
             if dtype_arg1 == torch.bfloat16 or dtype_arg2 == torch.bfloat16:
                 return
 
+        skip_complex = {torch.atan2, torch.max, torch.min, torch.remainder,
+                        torch.fmod, torch.ge, torch.gt, torch.le, torch.lt}
+
+        if operation in skip_complex:
+            if dtype_arg1.is_complex or dtype_arg2.is_complex:
+                return
+
         def t(x: torch.Tensor, y: torch.Tensor, z: torch.Tensor):
             o = operation(x, y)
             o = o + z
@@ -927,23 +934,13 @@ class TestCudaFuser(JitTestCase):
             "ndim"
         ]
 
-        skip_complex = {torch.atan2, torch.max, torch.min, torch.remainder,
-                        torch.fmod, torch.ge, torch.gt, torch.le, torch.lt}
-
         binary_dtype_combinations = list(itertools.combinations(data_types, 2))
         category_combinations = list(itertools.combinations(category_types, 2))
 
         for op, dtypes, categories in itertools.product(operations, binary_dtype_combinations, category_combinations):
-            print(op, dtypes, categories)
-            if dtypes[0].is_complex or dtypes[1].is_complex:
-                if op in skip_complex:
-                    continue
             self._binary_test_helper(op, dtypes, True, categories)  # random data
 
         for op, dtypes in itertools.product(operations, binary_dtype_combinations):
-            if dtypes[0].is_complex or dtypes[1].is_complex:
-                if op in skip_complex:
-                    continue
             self._binary_test_helper(op, dtypes, False)  # special numbers
 
     @unittest.skipIf(not RUN_NVFUSER, "requires CUDA")
