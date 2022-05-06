@@ -1138,52 +1138,160 @@ void zeta_kernel(TensorIteratorBase& iter) {
   });
 }
 
+void jacobi_elliptic_k_cd_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_cd_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_cd(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_cn_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_cn_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_cn(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_cs_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_cs_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_cs(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_dc_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_dc_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return zeta(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_dn_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_dn_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_dn(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_ds_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_ds_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_ds(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_nc_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_nc_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_nc(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_nd_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_nd_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_nd(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_ns_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_ns_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_ns(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_sc_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_sc_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_sc(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_sd_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_sd_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_sd(u, k);
+   });
+ });
+}
+
+void jacobi_elliptic_k_sn_kernel(TensorIteratorBase& iterator) {
+ AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "jacobi_elliptic_k_sn_cpu", [&]() {
+   cpu_kernel(iterator, [](scalar_t u, scalar_t k) -> scalar_t {
+     return jacobi_elliptic_k_sn(u, k);
+   });
+ });
+}
+
 } // namespace
 
 REGISTER_DISPATCH(add_clamp_stub, &add_clamp_kernel);
-REGISTER_DISPATCH(mul_stub, &mul_kernel);
-REGISTER_DISPATCH(div_true_stub, &div_true_kernel);
-REGISTER_DISPATCH(div_trunc_stub, &div_trunc_kernel);
-REGISTER_DISPATCH(div_floor_stub, &div_floor_kernel);
-REGISTER_DISPATCH(remainder_stub, &remainder_kernel);
 REGISTER_DISPATCH(atan2_stub, &atan2_kernel);
 REGISTER_DISPATCH(bitwise_and_stub, &bitwise_and_kernel);
 REGISTER_DISPATCH(bitwise_or_stub, &bitwise_or_kernel);
 REGISTER_DISPATCH(bitwise_xor_stub, &bitwise_xor_kernel);
-REGISTER_DISPATCH(lshift_stub, &lshift_kernel);
-REGISTER_DISPATCH(rshift_stub, &rshift_kernel);
-REGISTER_DISPATCH(logical_xor_stub, &logical_xor_kernel);
-REGISTER_DISPATCH(logical_and_stub, &logical_and_kernel);
-REGISTER_DISPATCH(logical_or_stub, &logical_or_kernel);
-REGISTER_DISPATCH(lt_stub, &lt_kernel);
-REGISTER_DISPATCH(le_stub, &le_kernel);
-REGISTER_DISPATCH(gt_stub, &gt_kernel);
-REGISTER_DISPATCH(ge_stub, &ge_kernel);
+REGISTER_DISPATCH(copysign_stub, &copysign_kernel);
+REGISTER_DISPATCH(div_floor_stub, &div_floor_kernel);
+REGISTER_DISPATCH(div_true_stub, &div_true_kernel);
+REGISTER_DISPATCH(div_trunc_stub, &div_trunc_kernel);
 REGISTER_DISPATCH(eq_stub, &eq_kernel);
-REGISTER_DISPATCH(ne_stub, &ne_kernel);
-REGISTER_DISPATCH(maximum_stub, &maximum_kernel);
-REGISTER_DISPATCH(minimum_stub, &minimum_kernel);
 REGISTER_DISPATCH(fmax_stub, &fmax_kernel);
 REGISTER_DISPATCH(fmin_stub, &fmin_kernel);
-REGISTER_DISPATCH(smooth_l1_stub, &smooth_l1_kernel);
-REGISTER_DISPATCH(huber_stub, &huber_kernel);
-REGISTER_DISPATCH(sigmoid_backward_stub, &sigmoid_backward_kernel);
-REGISTER_DISPATCH(logit_backward_stub, &logit_backward_kernel);
-REGISTER_DISPATCH(tanh_backward_stub, &tanh_backward_kernel);
-REGISTER_DISPATCH(mse_stub, &mse_kernel);
 REGISTER_DISPATCH(fmod_stub, &fmod_kernel);
-REGISTER_DISPATCH(logaddexp_stub, &logaddexp_kernel);
-REGISTER_DISPATCH(logaddexp2_stub, &logaddexp2_kernel);
 REGISTER_DISPATCH(gcd_stub, &gcd_kernel);
-REGISTER_DISPATCH(lcm_stub, &lcm_kernel);
+REGISTER_DISPATCH(ge_stub, &ge_kernel);
+REGISTER_DISPATCH(gt_stub, &gt_kernel);
+REGISTER_DISPATCH(heaviside_stub, &heaviside_kernel);
+REGISTER_DISPATCH(huber_stub, &huber_kernel);
 REGISTER_DISPATCH(hypot_stub, &hypot_kernel);
 REGISTER_DISPATCH(igamma_stub, &igamma_kernel);
 REGISTER_DISPATCH(igammac_stub, &igammac_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_cd_stub, &jacobi_elliptic_k_cd_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_cn_stub, &jacobi_elliptic_k_cn_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_cs_stub, &jacobi_elliptic_k_cs_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_dc_stub, &jacobi_elliptic_k_dc_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_dn_stub, &jacobi_elliptic_k_dn_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_ds_stub, &jacobi_elliptic_k_ds_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_nc_stub, &jacobi_elliptic_k_nc_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_nd_stub, &jacobi_elliptic_k_nd_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_ns_stub, &jacobi_elliptic_k_ns_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_sc_stub, &jacobi_elliptic_k_sc_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_sd_stub, &jacobi_elliptic_k_sd_kernel);
+REGISTER_DISPATCH(jacobi_elliptic_k_sn_stub, &jacobi_elliptic_k_sn_kernel);
+REGISTER_DISPATCH(lcm_stub, &lcm_kernel);
+REGISTER_DISPATCH(le_stub, &le_kernel);
+REGISTER_DISPATCH(logaddexp2_stub, &logaddexp2_kernel);
+REGISTER_DISPATCH(logaddexp_stub, &logaddexp_kernel);
+REGISTER_DISPATCH(logical_and_stub, &logical_and_kernel);
+REGISTER_DISPATCH(logical_or_stub, &logical_or_kernel);
+REGISTER_DISPATCH(logical_xor_stub, &logical_xor_kernel);
+REGISTER_DISPATCH(logit_backward_stub, &logit_backward_kernel);
+REGISTER_DISPATCH(lshift_stub, &lshift_kernel);
+REGISTER_DISPATCH(lt_stub, &lt_kernel);
+REGISTER_DISPATCH(maximum_stub, &maximum_kernel);
+REGISTER_DISPATCH(minimum_stub, &minimum_kernel);
+REGISTER_DISPATCH(mse_stub, &mse_kernel);
+REGISTER_DISPATCH(mul_stub, &mul_kernel);
+REGISTER_DISPATCH(ne_stub, &ne_kernel);
 REGISTER_DISPATCH(nextafter_stub, &nextafter_kernel);
-REGISTER_DISPATCH(heaviside_stub, &heaviside_kernel);
-REGISTER_DISPATCH(copysign_stub, &copysign_kernel);
-REGISTER_DISPATCH(xlogy_stub, &xlogy_kernel);
+REGISTER_DISPATCH(remainder_stub, &remainder_kernel);
+REGISTER_DISPATCH(rshift_stub, &rshift_kernel);
+REGISTER_DISPATCH(sigmoid_backward_stub, &sigmoid_backward_kernel);
+REGISTER_DISPATCH(smooth_l1_stub, &smooth_l1_kernel);
+REGISTER_DISPATCH(tanh_backward_stub, &tanh_backward_kernel);
 REGISTER_DISPATCH(xlog1py_stub, &xlog1py_kernel);
+REGISTER_DISPATCH(xlogy_stub, &xlogy_kernel);
 REGISTER_DISPATCH(zeta_stub, &zeta_kernel);
 
 } // namespace native
