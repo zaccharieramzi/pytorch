@@ -543,6 +543,22 @@ void round_decimals_kernel(TensorIteratorBase& iter, int64_t decimals) {
       });
 }
 
+static void fresnel_integral_c_kernel(TensorIteratorBase& iterator){
+    AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "fresnel_integral_c_cpu", [&]() {
+        cpu_kernel(iterator, [](scalar_t x) -> scalar_t {
+            return fresnel_integral_c(x);
+        });
+    });
+} // fresnel_integral_c_kernel
+
+static void fresnel_integral_s_kernel(TensorIteratorBase& iterator){
+    AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "fresnel_integral_s_cpu", [&]() {
+        cpu_kernel(iterator, [](scalar_t x) -> scalar_t {
+            return fresnel_integral_s(x);
+        });
+    });
+} // fresnel_integral_s_kernel
+
 // TODO: Disable cont. branch to test more risky code
 
 #define IMPLEMENT_ITERATOR_LAMBDA(op)                                         \
@@ -598,42 +614,43 @@ void round_decimals_kernel(TensorIteratorBase& iter, int64_t decimals) {
 
 } // CPU_CAPABILITY namespace
 
-REGISTER_DISPATCH(rsqrt_stub, &CPU_CAPABILITY::rsqrt_kernel);
-REGISTER_DISPATCH(sigmoid_stub, &CPU_CAPABILITY::sigmoid_kernel);
-REGISTER_DISPATCH(logit_stub, &CPU_CAPABILITY::logit_kernel);
 REGISTER_DISPATCH(abs_stub, &CPU_CAPABILITY::abs_kernel);
-REGISTER_DISPATCH(angle_stub, &CPU_CAPABILITY::angle_kernel);
-REGISTER_DISPATCH(conj_physical_stub, &CPU_CAPABILITY::conj_kernel);
-REGISTER_DISPATCH(exp2_stub, &CPU_CAPABILITY::exp2_kernel);
-REGISTER_DISPATCH(bitwise_not_stub, &CPU_CAPABILITY::bitwise_not_kernel);
-REGISTER_DISPATCH(logical_not_stub, &CPU_CAPABILITY::logical_not_kernel);
-REGISTER_DISPATCH(frac_stub, &CPU_CAPABILITY::frac_kernel);
-REGISTER_DISPATCH(reciprocal_stub, &CPU_CAPABILITY::reciprocal_kernel);
-REGISTER_DISPATCH(nan_to_num_stub, &CPU_CAPABILITY::nan_to_num_kernel);
-REGISTER_DISPATCH(neg_stub, &CPU_CAPABILITY::neg_kernel);
-REGISTER_DISPATCH(sign_stub, &CPU_CAPABILITY::sign_kernel);
-REGISTER_DISPATCH(signbit_stub, &CPU_CAPABILITY::signbit_kernel);
-REGISTER_DISPATCH(sgn_stub, &CPU_CAPABILITY::sgn_kernel);
-REGISTER_DISPATCH(sinc_stub, &CPU_CAPABILITY::sinc_kernel);
-REGISTER_DISPATCH(sinh_stub, &CPU_CAPABILITY::sinh_kernel);
-REGISTER_DISPATCH(cosh_stub, &CPU_CAPABILITY::cosh_kernel);
 REGISTER_DISPATCH(acosh_stub, &CPU_CAPABILITY::acosh_kernel);
+REGISTER_DISPATCH(angle_stub, &CPU_CAPABILITY::angle_kernel);
 REGISTER_DISPATCH(asinh_stub, &CPU_CAPABILITY::asinh_kernel);
 REGISTER_DISPATCH(atanh_stub, &CPU_CAPABILITY::atanh_kernel);
+REGISTER_DISPATCH(bitwise_not_stub, &CPU_CAPABILITY::bitwise_not_kernel);
+REGISTER_DISPATCH(conj_physical_stub, &CPU_CAPABILITY::conj_kernel);
+REGISTER_DISPATCH(cosh_stub, &CPU_CAPABILITY::cosh_kernel);
 REGISTER_DISPATCH(digamma_stub, &CPU_CAPABILITY::digamma_kernel);
-REGISTER_DISPATCH(trigamma_stub, &CPU_CAPABILITY::trigamma_kernel);
-REGISTER_DISPATCH(polygamma_stub, &CPU_CAPABILITY::polygamma_kernel);
-REGISTER_DISPATCH(kaiser_window_stub, &CPU_CAPABILITY::kaiser_window_kernel);
-REGISTER_DISPATCH(special_entr_stub, &CPU_CAPABILITY::entr_kernel);
+REGISTER_DISPATCH(exp2_stub, &CPU_CAPABILITY::exp2_kernel);
+REGISTER_DISPATCH(frac_stub, &CPU_CAPABILITY::frac_kernel);
 REGISTER_DISPATCH(frexp_stub, &CPU_CAPABILITY::frexp_kernel);
+REGISTER_DISPATCH(kaiser_window_stub, &CPU_CAPABILITY::kaiser_window_kernel);
+REGISTER_DISPATCH(logical_not_stub, &CPU_CAPABILITY::logical_not_kernel);
+REGISTER_DISPATCH(logit_stub, &CPU_CAPABILITY::logit_kernel);
+REGISTER_DISPATCH(nan_to_num_stub, &CPU_CAPABILITY::nan_to_num_kernel);
+REGISTER_DISPATCH(neg_stub, &CPU_CAPABILITY::neg_kernel);
+REGISTER_DISPATCH(polygamma_stub, &CPU_CAPABILITY::polygamma_kernel);
+REGISTER_DISPATCH(reciprocal_stub, &CPU_CAPABILITY::reciprocal_kernel);
+REGISTER_DISPATCH(round_decimals_stub, &CPU_CAPABILITY::round_decimals_kernel);
+REGISTER_DISPATCH(rsqrt_stub, &CPU_CAPABILITY::rsqrt_kernel);
+REGISTER_DISPATCH(sgn_stub, &CPU_CAPABILITY::sgn_kernel);
+REGISTER_DISPATCH(sigmoid_stub, &CPU_CAPABILITY::sigmoid_kernel);
+REGISTER_DISPATCH(sign_stub, &CPU_CAPABILITY::sign_kernel);
+REGISTER_DISPATCH(signbit_stub, &CPU_CAPABILITY::signbit_kernel);
+REGISTER_DISPATCH(sinc_stub, &CPU_CAPABILITY::sinc_kernel);
+REGISTER_DISPATCH(sinh_stub, &CPU_CAPABILITY::sinh_kernel);
+REGISTER_DISPATCH(special_entr_stub, &CPU_CAPABILITY::entr_kernel);
+REGISTER_DISPATCH(special_erfcx_stub, &CPU_CAPABILITY::erfcx_kernel);
+REGISTER_DISPATCH(special_fresnel_integral_c_stub, &CPU_CAPABILITY::fresnel_integral_c_kernel);
+REGISTER_DISPATCH(special_fresnel_integral_s_stub, &CPU_CAPABILITY::fresnel_integral_s_kernel);
 REGISTER_DISPATCH(special_i0e_stub, &CPU_CAPABILITY::i0e_kernel);
-REGISTER_DISPATCH(special_ndtri_stub, &CPU_CAPABILITY::ndtri_kernel);
-REGISTER_DISPATCH(special_log_ndtr_stub, &CPU_CAPABILITY::log_ndtr_kernel);
 REGISTER_DISPATCH(special_i1_stub, &CPU_CAPABILITY::i1_kernel);
 REGISTER_DISPATCH(special_i1e_stub, &CPU_CAPABILITY::i1e_kernel);
-REGISTER_DISPATCH(special_erfcx_stub, &CPU_CAPABILITY::erfcx_kernel);
-REGISTER_DISPATCH(round_decimals_stub, &CPU_CAPABILITY::round_decimals_kernel);
-
+REGISTER_DISPATCH(special_log_ndtr_stub, &CPU_CAPABILITY::log_ndtr_kernel);
+REGISTER_DISPATCH(special_ndtri_stub, &CPU_CAPABILITY::ndtri_kernel);
+REGISTER_DISPATCH(trigamma_stub, &CPU_CAPABILITY::trigamma_kernel);
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays)
 IMPLEMENT_COMPLEX_KERNEL(acos)

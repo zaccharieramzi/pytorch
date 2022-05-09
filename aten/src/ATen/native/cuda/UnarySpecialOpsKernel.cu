@@ -374,22 +374,52 @@ void entr_kernel_cuda(TensorIteratorBase& iter) {
   #endif
 }
 
-REGISTER_DISPATCH(exp2_stub, &exp2_kernel_cuda);
-REGISTER_DISPATCH(i0_stub, &i0_kernel_cuda);
-REGISTER_DISPATCH(special_i0e_stub, &i0e_kernel_cuda);
-REGISTER_DISPATCH(special_i1_stub, &i1_kernel_cuda);
-REGISTER_DISPATCH(special_i1e_stub, &i1e_kernel_cuda);
-REGISTER_DISPATCH(sigmoid_stub, &sigmoid_kernel_cuda);
-REGISTER_DISPATCH(sinc_stub, &sinc_kernel_cuda);
-REGISTER_DISPATCH(logit_stub, &logit_kernel_cuda);
+void fresnel_integral_c_kernel_cuda(TensorIteratorBase& iterator) {
+    #ifdef USE_JITERATOR
+        AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "fresnel_integral_c_cuda", [&]() {
+            jitted_gpu_kernel<fresnel_integral_c_name, scalar_t, scalar_t, 1>(iterator, fresnel_integral_c_string);
+        });
+    #else
+        AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "fresnel_integral_c_cuda", [&]() {
+            gpu_kernel(iterator, [] GPU_LAMBDA(scalar_t x) -> scalar_t {
+                return fresnel_integral_c(x);
+            });
+        });
+    #endif
+} // fresnel_integral_c_kernel_cuda
+
+void fresnel_integral_s_kernel_cuda(TensorIteratorBase& iterator) {
+    #ifdef USE_JITERATOR
+        AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "fresnel_integral_s_cuda", [&]() {
+            jitted_gpu_kernel<fresnel_integral_s_name, scalar_t, scalar_t, 1>(iterator, fresnel_integral_s_string);
+        });
+    #else
+        AT_DISPATCH_FLOATING_TYPES(iterator.common_dtype(), "fresnel_integral_s_cuda", [&]() {
+            gpu_kernel(iterator, [] GPU_LAMBDA(scalar_t x) -> scalar_t {
+                return fresnel_integral_s(x);
+            });
+        });
+    #endif
+} // fresnel_integral_s_kernel_cuda
+
 REGISTER_DISPATCH(erf_stub, &erf_kernel_cuda);
 REGISTER_DISPATCH(erfc_stub, &erfc_kernel_cuda);
 REGISTER_DISPATCH(erfinv_stub, &erfinv_kernel_cuda);
+REGISTER_DISPATCH(exp2_stub, &exp2_kernel_cuda);
+REGISTER_DISPATCH(i0_stub, &i0_kernel_cuda);
 REGISTER_DISPATCH(kaiser_window_stub, &kaiser_window_kernel_cuda);
+REGISTER_DISPATCH(logit_stub, &logit_kernel_cuda);
+REGISTER_DISPATCH(sigmoid_stub, &sigmoid_kernel_cuda);
+REGISTER_DISPATCH(sinc_stub, &sinc_kernel_cuda);
 REGISTER_DISPATCH(special_entr_stub, &entr_kernel_cuda);
-REGISTER_DISPATCH(special_ndtri_stub, &ndtri_kernel_cuda);
-REGISTER_DISPATCH(special_log_ndtr_stub, &log_ndtr_kernel_cuda);
 REGISTER_DISPATCH(special_erfcx_stub, &erfcx_kernel_cuda);
+REGISTER_DISPATCH(special_fresnel_integral_c_stub, &fresnel_integral_c_kernel_cuda);
+REGISTER_DISPATCH(special_fresnel_integral_s_stub, &fresnel_integral_s_kernel_cuda);
+REGISTER_DISPATCH(special_i0e_stub, &i0e_kernel_cuda);
+REGISTER_DISPATCH(special_i1_stub, &i1_kernel_cuda);
+REGISTER_DISPATCH(special_i1e_stub, &i1e_kernel_cuda);
+REGISTER_DISPATCH(special_log_ndtr_stub, &log_ndtr_kernel_cuda);
+REGISTER_DISPATCH(special_ndtri_stub, &ndtri_kernel_cuda);
 
 } // namespace native
 } // namespace at
