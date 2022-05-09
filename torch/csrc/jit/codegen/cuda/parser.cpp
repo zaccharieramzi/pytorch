@@ -1269,7 +1269,8 @@ class IrParser {
             auto& beta = value_map[node->inputs()[1]->unique()];
             auto& threshold = value_map[node->inputs()[2]->unique()];
             auto out = softplus(operand, beta, threshold);
-            value_map.emplace(node->output()->unique(), out);
+            value_map.emplace(
+                node->output()->unique(), ValueHolder(out, format));
           },
           isInputNonSizeZeroTensor,
           nullptr);
@@ -1291,7 +1292,8 @@ class IrParser {
             auto& value = value_map[node->inputs()[2]->unique()];
 
             auto out = threshold(operand, th, value);
-            value_map.emplace(node->output()->unique(), out);
+            value_map.emplace(
+                node->output()->unique(), ValueHolder(out, format));
           },
           isInputNonSizeZeroTensor,
           nullptr);
@@ -1349,7 +1351,8 @@ class IrParser {
                 : nullptr;
 
             Val* out = clamp(operand, min, max);
-            value_map.emplace(node->output()->unique(), out);
+            value_map.emplace(
+                node->output()->unique(), ValueHolder(out, format));
           },
           isInputNonSizeZeroTensor,
           nullptr);
@@ -2916,8 +2919,7 @@ class IrParser {
             MemoryFormat format;
             std::list<Val*> list_val;
             std::tie(format, list_val) = getConsistentValues(
-                MemoryFormat::Contiguous(),
-                value_map[node->inputs()[0]->unique()]);
+                MemoryFormat::Contiguous(), value_map[self_value->unique()]);
             auto self = list_val.front()->as<TensorView>();
             list_val.pop_front();
 
