@@ -17,19 +17,6 @@ const c10::DeviceIndex INVALID_INDEX = -2;
 
 namespace {
 
-bool getEnableComplexEnv() {
-  char* e = std::getenv("PYTORCH_NVFUSER_ENABLE_COMPLEX_PY");
-  if (e == nullptr) {
-    return false;
-  }
-  return std::string(e) == "1";
-}
-
-bool temporarilyDisableComplex() {
-  static bool result = !getEnableComplexEnv();
-  return result;
-}
-
 bool hasNonElementWiseOperation(const Node* node) {
   if (node->kind() == prim::CudaFusionGroup) {
     for (auto n : node->g(attr::Subgraph)->nodes()) {
@@ -184,8 +171,8 @@ bool compatibleType(const torch::jit::Value* val) {
           DataType::Null) {
         return false;
       }
-      if (temporarilyDisableComplex()) {
-        // Complex is disabled until its support is completely added
+      if (isEnabled(EnableOption::Complex)) {
+        // Complex is disabled by default until its support is completely added
         // TODO: remove this logic
         if (isComplexType(
                 aten_to_data_type(tensor_type->scalarType().value()))) {
