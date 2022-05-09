@@ -45,7 +45,7 @@ os.environ['PYTORCH_NVFUSER_DISABLE_FMA'] = '1'
 os.environ['PYTORCH_NVFUSER_DISABLE_FASTMATH'] = '1'
 os.environ['PYTORCH_NVFUSER_JIT_OPT_LEVEL'] = '0'
 os.environ['PYTORCH_NVFUSER_DISABLE_RNG_UNROLL'] = '1'
-os.environ['PYTORCH_NVFUSER_ENABLE_COMPLEX_PY'] = '1'
+os.environ['PYTORCH_NVFUSER_ENABLE'] = 'complex'
 
 if GRAPH_EXECUTOR == ProfilingMode.PROFILING:
     torch._C._jit_set_texpr_fuser_enabled(False)
@@ -149,7 +149,9 @@ class TestCudaFuser(JitTestCase):
             torch.float16,
             torch.float32,
             torch.float64,
-            torch.bool
+            torch.bool,
+            torch.complex64,
+            torch.complex128,
         ]
         if TEST_BF16:
             self.support_tensor_dtypes.append(torch.bfloat16)
