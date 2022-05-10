@@ -40,11 +40,8 @@ CUDA_MAJOR, CUDA_MINOR = 0, 0
 if RUN_NVFUSER and torch.version.cuda is not None:
     CUDA_MAJOR, CUDA_MINOR = (int(x) for x in torch.version.cuda.split('.')[:2])
 
-os.environ['PYTORCH_NVFUSER_DISABLE_FALLBACK'] = '1'
-os.environ['PYTORCH_NVFUSER_DISABLE_FMA'] = '1'
-os.environ['PYTORCH_NVFUSER_DISABLE_FASTMATH'] = '1'
+os.environ['PYTORCH_NVFUSER_DISABLE'] = 'fallback,fma,unroll_with_rng'
 os.environ['PYTORCH_NVFUSER_JIT_OPT_LEVEL'] = '0'
-os.environ['PYTORCH_NVFUSER_DISABLE_RNG_UNROLL'] = '1'
 os.environ['PYTORCH_NVFUSER_ENABLE'] = 'complex'
 
 if GRAPH_EXECUTOR == ProfilingMode.PROFILING:
@@ -2388,6 +2385,27 @@ class TestCudaFuser(JitTestCase):
         self.assertEqual(o.dtype, jit_o.dtype)
         self.assertEqual(o, jit_o)
         self.assertGraphContains(t_jit.graph_for(x, y, (0, 1), False), FUSION_GUARD)
+
+    @unittest.skipIf(is_pre_volta(), "reduction not supported in pre volta device")
+    @unittest.skipIf(not RUN_NVFUSER, "requires CUDA")
+    @unittest.skipIf(GRAPH_EXECUTOR != ProfilingMode.PROFILING,
+                     "Requires fusion optimization pass to be effective")
+    def test_profile_ivalue_multiple_profiles(self):
+        dtype = torch.float
+        device = "cuda"
+        x = torch.randn([7, 4, 7], dtype=dtype, device=device)
+
+        def t(x, num: int):
+            for i in range(num):
+                # varying reduction axes should break profile_ivalue
+                tmp = x.sum(i, keepdim=True)
+                # inplace add on input/output, can't be functionalized/fused
+                x += tmp
+            return x
+
+        with nvfuser_singleton_fusion(True):
+            t_jit = torch.jit.script(t)
+            self._run_helper(t_jit, t, x, 3, num_fusion=0)
 
     @unittest.skipIf(is_pre_volta(), "reduction not supported in pre volta device")
     @unittest.skipIf(not RUN_NVFUSER, "requires CUDA")
