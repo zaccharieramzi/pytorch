@@ -898,6 +898,7 @@ class TestCudaFuser(JitTestCase):
                 self.assertEqual(o.dtype, jit_o.dtype)
                 if test_value:
                     self.assertEqual(o, jit_o)
+                print(t_jit.graph_for(x, y))
                 self.assertGraphContains(t_jit.graph_for(x, y), FUSION_GUARD)
         except Exception as e:
             print("failing test for op: ", operation.__name__)
