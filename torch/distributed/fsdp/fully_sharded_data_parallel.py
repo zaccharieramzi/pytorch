@@ -28,6 +28,7 @@ from typing import (
 
 import torch
 import torch.distributed as dist
+from torch.distributed.utils import _replace_by_prefix
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
@@ -51,7 +52,7 @@ from ._optim_utils import (
     _unflatten_optim_state,
 )
 from ._utils import (
-    _apply_to_modules, _apply_to_tensors, _replace_by_prefix,
+    _apply_to_modules, _apply_to_tensors,
     _override_batchnorm_mixed_precision, _contains_batchnorm
 )
 from .flatten_params_wrapper import (
