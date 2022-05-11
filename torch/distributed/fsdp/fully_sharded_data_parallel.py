@@ -51,7 +51,7 @@ from ._optim_utils import (
     _process_pos_dim_tensor_state,
     _unflatten_optim_state,
 )
-from ._utils import _apply_to_modules, _apply_to_tensors, _replace_by_prefix
+from ._utils import _apply_to_modules, _apply_to_tensors
 from .flatten_params_wrapper import (
     FLAT_PARAM,
     FPW_MODULE,
