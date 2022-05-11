@@ -17820,7 +17820,7 @@ op_db: List[OpInfo] = [
             ),
         ),
         dtypes=all_types_and(torch.bool),
-        ref=lambda x: np_unary_ufunc_integer_promotion_wrapper(scipy.special.fresnel(x))[1] if TEST_SCIPY else _NOTHING,
+        ref=lambda x: scipy.special.fresnel(x)[1] if TEST_SCIPY else _NOTHING,
         supports_autograd=False,
     ),
     UnaryUfuncInfo(
@@ -17836,7 +17836,7 @@ op_db: List[OpInfo] = [
             ),
         ),
         dtypes=all_types_and(torch.bool),
-        ref=lambda x: np_unary_ufunc_integer_promotion_wrapper(scipy.special.fresnel(x))[0] if TEST_SCIPY else _NOTHING,
+        ref=lambda x: scipy.special.fresnel(x)[0] if TEST_SCIPY else _NOTHING,
         supports_autograd=False,
     ),
 ]
