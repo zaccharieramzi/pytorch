@@ -148,9 +148,6 @@ class _ForkerIterDataPipe(IterDataPipe):
            all(p == self.end_ptr for p in self.child_pointers):
             self._datapipe_iterator = None
 
-    def is_instance_started(self, instance_id: int) -> bool:
-        return self.child_pointers[instance_id] != 0
-
     def is_every_instance_exhausted(self) -> bool:
         return all(self.end_ptr == ptr for ptr in self.child_pointers)
 
@@ -195,25 +192,42 @@ class _ChildDataPipe(IterDataPipe):
     Iterable Datapipe that is a child of a main DataPipe. The instance of this class
     will pass its instance_id to get the next value from its main DataPipe.
 
+    Note:
+        ChildDataPipe, like all other IterDataPipe, follows the singler iterator per IterDataPipe constraint.
+        Since ChildDataPipes share a common buffer, when an iterator is created for one of the ChildDataPipes,
+        the previous iterators  for all ChildDataPipes must be invalidated, with the exception when a ChildDataPipe
+        hasn't had an iterator created from it since the last invalidation. See the example below.
+
+    Singler Iterator per IteraDataPipe Invalidation Example:
+        >>> source_dp = IterableWrapper(range(10))
+        >>> cdp1, cdp2 = source_dp.fork(num_instances=2)
+        >>> it1, it2 = iter(cdp1), iter(cdp2)
+        >>> it3 = iter(cdp1)
+        The line above invalidates `it1` and `it2`, and resets `ForkerIterDataPipe`.
+        >>> it4 = iter(cdp2)
+        The line above doesn't invalidate `it3`, because an iterator for `cdp2` hasn't been created since
+        the last invalidation.
+
     Args:
         main_datapipe: Main DataPipe with a method 'get_next_element_by_instance(instance_id)'
         instance_id: integer identifier of this instance
     """
-    def __init__(self, main_datapipe, instance_id: int):
-        required_attrs = ["get_next_element_by_instance", "is_instance_started", "is_every_instance_exhausted", "reset"]
+    _is_child_datapipe: bool = True
+
+    def __init__(self, main_datapipe: IterDataPipe, instance_id: int):
+        required_attrs = ["get_next_element_by_instance", "is_every_instance_exhausted", "reset"]
         required_ops = [getattr(main_datapipe, attr) for attr in required_attrs]
         if any(not callable(op) for op in required_ops):
             raise NotImplementedError(f"Main Datapipe must have methods {required_attrs} implemented.")
-        self.main_datapipe = main_datapipe
+        self.main_datapipe: IterDataPipe = main_datapipe
         self.instance_id = instance_id
 
     def __iter__(self):
-        if self.main_datapipe.is_instance_started(self.instance_id):  # Only reset if the DataPipe started to read
-            if not self.main_datapipe.is_every_instance_exhausted():
-                warnings.warn("Some child DataPipes are not exhausted when __iter__ is called. We are resetting "
-                              "the buffer and each child DataPipe will read from the start again.", UserWarning)
-            self.main_datapipe.reset()
-        # We want to separate the code for reset and yield, so that 'reset' exeutes before __next__ is called
+        if not self.main_datapipe.is_every_instance_exhausted():
+            warnings.warn("Some child DataPipes are not exhausted when __iter__ is called. We are resetting "
+                          "the buffer and each child DataPipe will read from the start again.", UserWarning)
+        # Note that the logic behind setting iterator ID and `reset` are handled within `hook_iterator`
+        # We want to separate the code for reset and yield, so that 'reset' executes before __next__ is called
         return self.get_generator_by_instance(self.instance_id)
 
     def __len__(self):
@@ -221,6 +235,33 @@ class _ChildDataPipe(IterDataPipe):
 
     def get_generator_by_instance(self, instance_id: int):
         yield from self.main_datapipe.get_next_element_by_instance(self.instance_id)
+
+    # This method is called by `hook_iterator` in `_typing.py`.
+    def _set_main_datapipe_valid_iterator_id(self) -> int:
+        r"""
+        Update the valid iterator ID for both this DataPipe object and `main_datapipe`.
+        `main_datapipe.reset()` is called when the ID is incremented to a new generation.
+        """
+        # 1. First time any child iterator is created
+        if self.main_datapipe._valid_iterator_id is None:
+            self.main_datapipe._valid_iterator_id = 0  # type: ignore[attr-defined]
+        # 2. This instance was already in the same generation as `main_datapipe`,
+        #    we need to increment the ID further by 1
+        elif self.main_datapipe._valid_iterator_id == self._valid_iterator_id:  # type: ignore[has-type]
+            self.main_datapipe._valid_iterator_id += 1  # type: ignore[attr-defined]
+            # Whenever a new generation of iterator is created, the `main_datapipe` must reset
+            self.main_datapipe.reset()
+        # 3. Otherwise, the iterator is behind the others, so it will just need to catch up by setting
+        #    the instance's iterator to match that of `main_datapipe`
+        self._valid_iterator_id = self.main_datapipe._valid_iterator_id
+        return self._valid_iterator_id
+
+    # This method is called by `hook_iterator` in `_typing.py`.
+    def _check_valid_iterator_id(self, iterator_id) -> bool:
+        r"""
+        Check the valid iterator ID against that of DataPipe object and that of `main_datapipe`.
+        """
+        return iterator_id == self._valid_iterator_id and iterator_id == self.main_datapipe._valid_iterator_id
 
 
 @functional_datapipe('demux')
@@ -336,9 +377,6 @@ class _DemultiplexerIterDataPipe(IterDataPipe):
                     stop = True
                     self.main_datapipe_exhausted = True
                     self._datapipe_iterator = None
-
-    def is_instance_started(self, instance_id: int) -> bool:
-        return self.instance_started[instance_id]
 
     def is_every_instance_exhausted(self) -> bool:
         return self.main_datapipe_exhausted and all(not child_buffer for child_buffer in self.child_buffers)
