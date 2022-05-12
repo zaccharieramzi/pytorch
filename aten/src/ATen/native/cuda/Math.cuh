@@ -1275,7 +1275,7 @@ const auto jacobi_elliptic_string = jiterator_stringify(
         T c_n = (a - b) / 2;
         T a_n = (a + b) / 2;
 
-        if (c_n < T(2.22045e-16) {
+        if (c_n < T(2.22045e-16)) {
             m = std::ldexp(T(1), (int) n) * x * a_n;
         } else {
             m = jacobi_elliptic_recurrence<T>(x, k, a_n, std::sqrt(a * b), n, 0);
@@ -1325,7 +1325,7 @@ const auto jacobi_elliptic_string = jiterator_stringify(
             return std::tanh(u);
         }
 
-        if (k < std::sqrt(std::sqrt(T(2.22045e-16))) {
+        if (k < std::sqrt(std::sqrt(T(2.22045e-16)))) {
             T su = std::sin(u);
             T cu = std::cos(u);
 
