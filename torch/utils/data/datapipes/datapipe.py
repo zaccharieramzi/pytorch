@@ -1,7 +1,7 @@
 import functools
 from typing import Dict, Callable, Optional, TypeVar, Generic, Iterator
 
-from torch.utils.data.datapipes._typing import _DataPipeMeta
+from torch.utils.data.datapipes._typing import _DataPipeMeta, _IterDataPipeMeta
 from torch.utils.data.dataset import Dataset, IterableDataset
 
 __all__ = [
@@ -21,7 +21,7 @@ UNTRACABLE_DATAFRAME_PIPES = ['batch',  # As it returns DataChunks
                               ]
 
 
-class IterDataPipe(IterableDataset[T_co], metaclass=_DataPipeMeta):
+class IterDataPipe(IterableDataset[T_co], metaclass=_IterDataPipeMeta):
     r"""
     Iterable-style DataPipe.
 
