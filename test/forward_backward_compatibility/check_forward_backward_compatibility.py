@@ -134,6 +134,8 @@ ALLOW_LIST = [
     ("aten::stft", datetime.date(2022, 5, 23)),
     ("aten::linalg_lu_solve", datetime.date(2022, 5, 23)),
     ("aten::linalg_lu_solve.out", datetime.date(2022, 5, 23)),
+    ("aten::_weight_norm_cuda_interface", datetime.date(9999, 1, 1)),
+    ("aten::_weight_norm_cuda_interface_backward", datetime.date(9999, 1, 1)),
 ]
 
 ALLOW_LIST_COMPILED = [
