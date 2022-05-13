@@ -659,7 +659,7 @@ _computation_dtype_map = {
 }
 
 
-def _get_computation_dtype(dtype: torch.dtype) -> torch.dtype:
+def get_computation_dtype(dtype: torch.dtype) -> torch.dtype:
     return _computation_dtype_map.get(dtype, dtype)
 
 
@@ -849,18 +849,18 @@ def elementwise_dtypes(
     if type_promotion_kind is ELEMENTWISE_TYPE_PROMOTION_KIND.DEFAULT:
         return result_dtype, result_dtype
     elif type_promotion_kind is ELEMENTWISE_TYPE_PROMOTION_KIND.OP_MATH:
-        return _get_computation_dtype(result_dtype), result_dtype
+        return get_computation_dtype(result_dtype), result_dtype
     elif type_promotion_kind is ELEMENTWISE_TYPE_PROMOTION_KIND.INT_TO_FLOAT:
         if is_integer_dtype(result_dtype) or is_boolean_dtype(result_dtype):
             result_dtype = torch.get_default_dtype()
-        return _get_computation_dtype(result_dtype), result_dtype
+        return get_computation_dtype(result_dtype), result_dtype
     elif type_promotion_kind is ELEMENTWISE_TYPE_PROMOTION_KIND.COMPLEX_TO_FLOAT:
         if is_complex_dtype(result_dtype):
             # Note: computation still occurs in complex
-            return _get_computation_dtype(result_dtype), corresponding_real_dtype(
+            return get_computation_dtype(result_dtype), corresponding_real_dtype(
                 result_dtype
             )
-        return _get_computation_dtype(result_dtype), result_dtype
+        return get_computation_dtype(result_dtype), result_dtype
     elif type_promotion_kind is ELEMENTWISE_TYPE_PROMOTION_KIND.BOOL_TO_LONG:
         if is_boolean_dtype(result_dtype):
             return torch.long, torch.long
